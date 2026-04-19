@@ -83,9 +83,9 @@ http://127.0.0.1:5000
 
 ## Student Details
 
-- **Name:** ___________________
-- **Roll Number:** ___________________
-- **Batch/Program:** ___________________
+- **Name:** Atharv Sheersh Chaturvedi
+- **Roll Number:** 23053034
+- **Batch/Program:** BTech/CSE
 
 ---
 
