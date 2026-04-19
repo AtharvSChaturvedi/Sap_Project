@@ -1,0 +1,118 @@
+{
+  "vendors": [
+    {
+      "id": "V001",
+      "name": "Alpha Supplies Pvt Ltd",
+      "contact": "9876543210",
+      "email": "alpha@supplies.com",
+      "category": "Raw Materials",
+      "status": "Active"
+    },
+    {
+      "id": "V002",
+      "name": "Beta Tech Solutions",
+      "contact": "9812345670",
+      "email": "beta@tech.com",
+      "category": "IT Equipment",
+      "status": "Active"
+    },
+    {
+      "id": "V003",
+      "name": "Gamma Logistics",
+      "contact": "9754321098",
+      "email": "gamma@logist.com",
+      "category": "Logistics",
+      "status": "Inactive"
+    },
+    {
+      "id": "V004",
+      "name": "Delta Industries",
+      "contact": "1234567890",
+      "email": "vendor@delta.com",
+      "category": "IT Equipment",
+      "status": "Active"
+    }
+  ],
+  "purchase_orders": [
+    {
+      "id": "PO-001",
+      "vendor_id": "V001",
+      "vendor_name": "Alpha Supplies Pvt Ltd",
+      "item": "Steel Rods",
+      "qty": 500,
+      "unit_price": 120,
+      "total": 60000,
+      "date": "2026-04-01",
+      "status": "Received"
+    },
+    {
+      "id": "PO-002",
+      "vendor_id": "V002",
+      "vendor_name": "Beta Tech Solutions",
+      "item": "Laptops",
+      "qty": 10,
+      "unit_price": 45000,
+      "total": 450000,
+      "date": "2026-04-05",
+      "status": "Pending"
+    },
+    {
+      "id": "PO-003",
+      "vendor_id": "V001",
+      "vendor_name": "Alpha Supplies Pvt Ltd",
+      "item": "Copper Wire",
+      "qty": 200,
+      "unit_price": 350,
+      "total": 70000,
+      "date": "2026-04-10",
+      "status": "In Transit"
+    }
+  ],
+  "invoices": [
+    {
+      "id": "INV-001",
+      "po_id": "PO-001",
+      "vendor_name": "Alpha Supplies Pvt Ltd",
+      "amount": 60000,
+      "due_date": "2026-04-20",
+      "status": "Paid"
+    },
+    {
+      "id": "INV-002",
+      "po_id": "PO-003",
+      "vendor_name": "Alpha Supplies Pvt Ltd",
+      "amount": 70000,
+      "due_date": "2026-04-28",
+      "status": "Paid"
+    }
+  ],
+  "inventory": [
+    {
+      "id": "ITM-001",
+      "name": "Steel Rods",
+      "category": "Raw Materials",
+      "qty": 500,
+      "unit": "pcs",
+      "reorder_level": 100,
+      "warehouse": "WH-A"
+    },
+    {
+      "id": "ITM-002",
+      "name": "Copper Wire",
+      "category": "Raw Materials",
+      "qty": 200,
+      "unit": "mtrs",
+      "reorder_level": 50,
+      "warehouse": "WH-A"
+    },
+    {
+      "id": "ITM-003",
+      "name": "Laptops",
+      "category": "IT Equipment",
+      "qty": 0,
+      "unit": "pcs",
+      "reorder_level": 5,
+      "warehouse": "WH-B"
+    }
+  ]
+}
