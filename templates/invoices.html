@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}Invoices — P2P ERP{% endblock %}
+{% block page_title %}Invoice Management{% endblock %}
+
+{% block content %}
+<div class="card">
+  <div class="card-header"><h2>Invoices</h2></div>
+  <table class="table" id="inv-table">
+    <thead>
+      <tr><th>Invoice ID</th><th>PO Reference</th><th>Vendor</th><th>Amount (₹)</th><th>Due Date</th><th>Status</th><th>Action</th></tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  function loadInvoices(){
+    fetch("/api/invoices").then(r=>r.json()).then(invs=>{
+      document.querySelector("#inv-table tbody").innerHTML = invs.map(i=>`
+        <tr>
+          <td><span class="badge badge-id">${i.id}</span></td>
+          <td>${i.po_id}</td>
+          <td>${i.vendor_name}</td>
+          <td><strong>₹${i.amount.toLocaleString("en-IN")}</strong></td>
+          <td>${i.due_date}</td>
+          <td><span class="badge badge-${i.status==='Paid'?'green':'red'}">${i.status}</span></td>
+          <td>
+            ${i.status==='Unpaid'?`<button class="btn btn-sm btn-primary" onclick="payInvoice('${i.id}')"><i class="fa-solid fa-check"></i> Mark Paid</button>`:'<span style="color:#aaa">—</span>'}
+          </td>
+        </tr>`).join("");
+    });
+  }
+
+  function payInvoice(id){
+    if(!confirm("Mark this invoice as Paid?")) return;
+    fetch(`/api/invoices/${id}/pay`,{method:"PATCH"}).then(()=>loadInvoices());
+  }
+
+  loadInvoices();
+</script>
+{% endblock %}

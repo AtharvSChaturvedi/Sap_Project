@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+{% block title %}Purchase Orders — P2P ERP{% endblock %}
+{% block page_title %}Purchase Orders{% endblock %}
+
+{% block content %}
+<div class="card">
+  <div class="card-header">
+    <h2>All Purchase Orders</h2>
+    <button class="btn btn-primary" onclick="openAddPO()"><i class="fa-solid fa-plus"></i> Create PO</button>
+  </div>
+  <table class="table" id="po-table">
+    <thead>
+      <tr><th>PO ID</th><th>Vendor</th><th>Item</th><th>Qty</th><th>Unit Price</th><th>Total</th><th>Date</th><th>Status</th><th>Actions</th></tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  const statusColors = {Received:"green",Pending:"orange","In Transit":"blue",Cancelled:"red"};
+
+  function loadPOs(){
+    fetch("/api/purchase-orders").then(r=>r.json()).then(pos=>{
+      document.querySelector("#po-table tbody").innerHTML = pos.map(p=>`
+        <tr>
+          <td><span class="badge badge-id">${p.id}</span></td>
+          <td>${p.vendor_name}</td>
+          <td>${p.item}</td>
+          <td>${p.qty}</td>
+          <td>₹${p.unit_price.toLocaleString("en-IN")}</td>
+          <td><strong>₹${p.total.toLocaleString("en-IN")}</strong></td>
+          <td>${p.date}</td>
+          <td><span class="badge badge-${statusColors[p.status]||'grey'}">${p.status}</span></td>
+          <td>
+            <select class="form-input-sm" onchange="updateStatus('${p.id}', this.value)">
+              <option value="">Update</option>
+              <option value="Pending">Pending</option>
+              <option value="In Transit">In Transit</option>
+              <option value="Received">Received</option>
+              <option value="Cancelled">Cancelled</option>
+            </select>
+          </td>
+        </tr>`).join("");
+    });
+  }
+
+  let vendorList = [];
+  function openAddPO(){
+    fetch("/api/vendors").then(r=>r.json()).then(vendors=>{
+      vendorList = vendors.filter(v=>v.status==="Active");
+      const opts = vendorList.map(v=>`<option value="${v.id}">${v.name}</option>`).join("");
+      document.getElementById("modal-body").innerHTML = `
+        <h2 style="margin-bottom:1.2rem"><i class="fa-solid fa-file-invoice"></i> Create Purchase Order</h2>
+        <div class="form-group"><label>Vendor</label><select id="po-vendor" class="form-input">${opts}</select></div>
+        <div class="form-group"><label>Item Name</label><input id="po-item" class="form-input" placeholder="e.g. Steel Rods"/></div>
+        <div class="form-group form-row">
+          <div><label>Quantity</label><input id="po-qty" class="form-input" type="number" min="1" placeholder="100"/></div>
+          <div><label>Unit Price (₹)</label><input id="po-price" class="form-input" type="number" min="1" placeholder="500"/></div>
+        </div>
+        <div class="form-group" id="po-total-display" style="font-weight:600;color:var(--primary)"></div>
+        <button class="btn btn-primary" onclick="submitPO()" style="width:100%;margin-top:.5rem">Create PO</button>`;
+      openModal();
+      ["po-qty","po-price"].forEach(id=>document.getElementById(id).addEventListener("input", ()=>{
+        const q=parseFloat(document.getElementById("po-qty").value)||0, p=parseFloat(document.getElementById("po-price").value)||0;
+        document.getElementById("po-total-display").textContent = q&&p?`Total: ₹${(q*p).toLocaleString("en-IN")}`:"";
+      }));
+    });
+  }
+
+  function submitPO(){
+    const body = { vendor_id: document.getElementById("po-vendor").value, item: document.getElementById("po-item").value, qty: document.getElementById("po-qty").value, unit_price: document.getElementById("po-price").value };
+    if(!body.item||!body.qty||!body.unit_price){ alert("Fill all fields"); return; }
+    fetch("/api/purchase-orders",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)})
+      .then(r=>r.json()).then(()=>{ closeModal(); loadPOs(); });
+  }
+
+  function updateStatus(id, status){
+    if(!status) return;
+    fetch(`/api/purchase-orders/${id}/status`,{method:"PATCH",headers:{"Content-Type":"application/json"},body:JSON.stringify({status})})
+      .then(()=>loadPOs());
+  }
+
+  loadPOs();
+</script>
+{% endblock %}

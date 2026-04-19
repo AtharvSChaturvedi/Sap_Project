@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% block title %}Inventory — P2P ERP{% endblock %}
+{% block page_title %}Inventory Management{% endblock %}
+
+{% block content %}
+<div class="card">
+  <div class="card-header">
+    <h2>Stock Register</h2>
+    <button class="btn btn-primary" onclick="openAddItem()"><i class="fa-solid fa-plus"></i> Add Item</button>
+  </div>
+  <table class="table" id="inv-table">
+    <thead>
+      <tr><th>Item ID</th><th>Name</th><th>Category</th><th>Qty</th><th>Unit</th><th>Reorder Level</th><th>Warehouse</th><th>Stock Status</th></tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  function loadInventory(){
+    fetch("/api/inventory").then(r=>r.json()).then(items=>{
+      document.querySelector("#inv-table tbody").innerHTML = items.map(i=>{
+        const low = i.qty <= i.reorder_level;
+        return `<tr>
+          <td><span class="badge badge-id">${i.id}</span></td>
+          <td><strong>${i.name}</strong></td>
+          <td>${i.category}</td>
+          <td>${i.qty}</td>
+          <td>${i.unit}</td>
+          <td>${i.reorder_level}</td>
+          <td>${i.warehouse}</td>
+          <td><span class="badge badge-${low?'red':'green'}">${low?'⚠ Low Stock':'In Stock'}</span></td>
+        </tr>`;
+      }).join("");
+    });
+  }
+
+  function openAddItem(){
+    document.getElementById("modal-body").innerHTML = `
+      <h2 style="margin-bottom:1.2rem"><i class="fa-solid fa-warehouse"></i> Add Inventory Item</h2>
+      <div class="form-group"><label>Item Name</label><input id="i-name" class="form-input" placeholder="e.g. Aluminium Sheets"/></div>
+      <div class="form-group"><label>Category</label>
+        <select id="i-cat" class="form-input">
+          <option>Raw Materials</option><option>IT Equipment</option><option>Finished Goods</option><option>Consumables</option>
+        </select>
+      </div>
+      <div class="form-group form-row">
+        <div><label>Quantity</label><input id="i-qty" class="form-input" type="number" min="0" placeholder="100"/></div>
+        <div><label>Unit</label><input id="i-unit" class="form-input" placeholder="pcs / kg / mtrs"/></div>
+      </div>
+      <div class="form-group form-row">
+        <div><label>Reorder Level</label><input id="i-reorder" class="form-input" type="number" min="0" placeholder="20"/></div>
+        <div><label>Warehouse</label><input id="i-wh" class="form-input" placeholder="WH-A"/></div>
+      </div>
+      <button class="btn btn-primary" onclick="submitItem()" style="width:100%;margin-top:.5rem">Save Item</button>`;
+    openModal();
+  }
+
+  function submitItem(){
+    const body = { name: document.getElementById("i-name").value, category: document.getElementById("i-cat").value, qty: document.getElementById("i-qty").value, unit: document.getElementById("i-unit").value, reorder_level: document.getElementById("i-reorder").value, warehouse: document.getElementById("i-wh").value };
+    if(!body.name||!body.qty||!body.unit){ alert("Fill all required fields"); return; }
+    fetch("/api/inventory",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)})
+      .then(r=>r.json()).then(()=>{ closeModal(); loadInventory(); });
+  }
+
+  loadInventory();
+</script>
+{% endblock %}

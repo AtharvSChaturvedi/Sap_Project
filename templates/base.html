@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>{% block title %}P2P ERP System{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+</head>
+<body>
+  <aside class="sidebar">
+    <div class="brand">
+      <i class="fa-solid fa-boxes-stacked"></i>
+      <span>P2P ERP</span>
+    </div>
+    <nav>
+      <a href="/" class="nav-link {% if request.path == '/' %}active{% endif %}">
+        <i class="fa-solid fa-chart-pie"></i> Dashboard
+      </a>
+      <a href="/vendors" class="nav-link {% if request.path == '/vendors' %}active{% endif %}">
+        <i class="fa-solid fa-store"></i> Vendors
+      </a>
+      <a href="/purchase-orders" class="nav-link {% if request.path == '/purchase-orders' %}active{% endif %}">
+        <i class="fa-solid fa-file-invoice"></i> Purchase Orders
+      </a>
+      <a href="/invoices" class="nav-link {% if request.path == '/invoices' %}active{% endif %}">
+        <i class="fa-solid fa-receipt"></i> Invoices
+      </a>
+      <a href="/inventory" class="nav-link {% if request.path == '/inventory' %}active{% endif %}">
+        <i class="fa-solid fa-warehouse"></i> Inventory
+      </a>
+    </nav>
+    <div class="sidebar-footer">
+      <i class="fa-solid fa-circle-user"></i> Student Demo
+    </div>
+  </aside>
+
+  <main class="main-content">
+    <header class="topbar">
+      <h1 class="page-title">{% block page_title %}Dashboard{% endblock %}</h1>
+      <div class="topbar-right">
+        <span class="badge-date"><i class="fa-regular fa-calendar"></i> {% block date_display %}{% endblock %}</span>
+      </div>
+    </header>
+    <div class="content-area">
+      {% block content %}{% endblock %}
+    </div>
+  </main>
+
+  <div id="modal-overlay" class="modal-overlay hidden">
+    <div class="modal-box" id="modal-box">
+      <button class="modal-close" onclick="closeModal()"><i class="fa-solid fa-xmark"></i></button>
+      <div id="modal-body"></div>
+    </div>
+  </div>
+
+  <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% block title %}Vendors — P2P ERP{% endblock %}
+{% block page_title %}Vendor Management{% endblock %}
+
+{% block content %}
+<div class="card">
+  <div class="card-header">
+    <h2>Vendor List</h2>
+    <button class="btn btn-primary" onclick="openAddVendor()"><i class="fa-solid fa-plus"></i> Add Vendor</button>
+  </div>
+  <table class="table" id="vendor-table">
+    <thead>
+      <tr><th>Vendor ID</th><th>Name</th><th>Category</th><th>Contact</th><th>Email</th><th>Status</th><th>Actions</th></tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  function statusClass(s){ return {Active:"green",Inactive:"red"}[s]||"grey"; }
+
+  function loadVendors(){
+    fetch("/api/vendors").then(r=>r.json()).then(vendors=>{
+      const tbody = document.querySelector("#vendor-table tbody");
+      tbody.innerHTML = vendors.map(v=>`
+        <tr>
+          <td><span class="badge badge-id">${v.id}</span></td>
+          <td><strong>${v.name}</strong></td>
+          <td>${v.category}</td>
+          <td>${v.contact}</td>
+          <td>${v.email}</td>
+          <td><span class="badge badge-${statusClass(v.status)}">${v.status}</span></td>
+          <td>
+            <button class="btn-icon red" onclick="deleteVendor('${v.id}')"><i class="fa-solid fa-trash"></i></button>
+          </td>
+        </tr>`).join("");
+    });
+  }
+
+  function openAddVendor(){
+    document.getElementById("modal-body").innerHTML = `
+      <h2 style="margin-bottom:1.2rem"><i class="fa-solid fa-store"></i> Add New Vendor</h2>
+      <div class="form-group"><label>Company Name</label><input id="v-name" class="form-input" placeholder="e.g. Reliance Industries"/></div>
+      <div class="form-group"><label>Category</label>
+        <select id="v-cat" class="form-input">
+          <option>Raw Materials</option><option>IT Equipment</option><option>Logistics</option><option>Services</option><option>Utilities</option>
+        </select>
+      </div>
+      <div class="form-group"><label>Contact Number</label><input id="v-contact" class="form-input" placeholder="10-digit mobile"/></div>
+      <div class="form-group"><label>Email</label><input id="v-email" class="form-input" type="email" placeholder="vendor@company.com"/></div>
+      <button class="btn btn-primary" onclick="submitVendor()" style="width:100%;margin-top:.5rem">Save Vendor</button>`;
+    openModal();
+  }
+
+  function submitVendor(){
+    const body = { name: document.getElementById("v-name").value, category: document.getElementById("v-cat").value, contact: document.getElementById("v-contact").value, email: document.getElementById("v-email").value };
+    if(!body.name || !body.contact || !body.email){ alert("Please fill all fields"); return; }
+    fetch("/api/vendors",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)})
+      .then(r=>r.json()).then(()=>{ closeModal(); loadVendors(); });
+  }
+
+  function deleteVendor(id){
+    if(!confirm("Delete this vendor?")) return;
+    fetch(`/api/vendors/${id}`,{method:"DELETE"}).then(()=>loadVendors());
+  }
+
+  loadVendors();
+</script>
+{% endblock %}
