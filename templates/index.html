@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% block title %}Dashboard — P2P ERP{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+{% block date_display %}<span id="live-date"></span>{% endblock %}
+
+{% block content %}
+<div class="stats-grid" id="stats-grid">
+  <div class="stat-card blue">
+    <div class="stat-icon"><i class="fa-solid fa-store"></i></div>
+    <div class="stat-info"><span class="stat-value" id="s-vendors">—</span><span class="stat-label">Active Vendors</span></div>
+  </div>
+  <div class="stat-card green">
+    <div class="stat-icon"><i class="fa-solid fa-file-invoice"></i></div>
+    <div class="stat-info"><span class="stat-value" id="s-pos">—</span><span class="stat-label">Purchase Orders</span></div>
+  </div>
+  <div class="stat-card orange">
+    <div class="stat-icon"><i class="fa-solid fa-indian-rupee-sign"></i></div>
+    <div class="stat-info"><span class="stat-value" id="s-po-value">—</span><span class="stat-label">Total PO Value</span></div>
+  </div>
+  <div class="stat-card red">
+    <div class="stat-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
+    <div class="stat-info"><span class="stat-value" id="s-unpaid">—</span><span class="stat-label">Unpaid Invoices</span></div>
+  </div>
+</div>
+
+<div class="dashboard-grid">
+  <div class="card">
+    <div class="card-header"><h2>Recent Purchase Orders</h2></div>
+    <table class="table" id="recent-po-table">
+      <thead><tr><th>PO ID</th><th>Vendor</th><th>Item</th><th>Total (₹)</th><th>Status</th></tr></thead>
+      <tbody></tbody>
+    </table>
+  </div>
+  <div class="card">
+    <div class="card-header"><h2>Quick Actions</h2></div>
+    <div class="quick-actions">
+      <a href="/vendors" class="qa-btn blue"><i class="fa-solid fa-plus"></i> Add Vendor</a>
+      <a href="/purchase-orders" class="qa-btn green"><i class="fa-solid fa-plus"></i> New PO</a>
+      <a href="/inventory" class="qa-btn orange"><i class="fa-solid fa-warehouse"></i> View Inventory</a>
+      <a href="/invoices" class="qa-btn red"><i class="fa-solid fa-receipt"></i> Manage Invoices</a>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  document.getElementById("live-date").textContent = new Date().toLocaleDateString("en-IN",{weekday:"short",year:"numeric",month:"long",day:"numeric"});
+
+  fetch("/api/dashboard").then(r=>r.json()).then(d=>{
+    document.getElementById("s-vendors").textContent = d.active_vendors;
+    document.getElementById("s-pos").textContent = d.total_pos;
+    document.getElementById("s-po-value").textContent = "₹" + d.total_po_value.toLocaleString("en-IN");
+    document.getElementById("s-unpaid").textContent = "₹" + d.unpaid_invoices.toLocaleString("en-IN");
+    const tbody = document.querySelector("#recent-po-table tbody");
+    tbody.innerHTML = d.recent_pos.map(p=>`
+      <tr>
+        <td><span class="badge badge-id">${p.id}</span></td>
+        <td>${p.vendor_name}</td>
+        <td>${p.item}</td>
+        <td>₹${p.total.toLocaleString("en-IN")}</td>
+        <td><span class="badge badge-${statusClass(p.status)}">${p.status}</span></td>
+      </tr>`).join("");
+  });
+
+  function statusClass(s){
+    return {Received:"green",Pending:"orange","In Transit":"blue",Paid:"green",Unpaid:"red",Active:"green",Inactive:"red"}[s]||"grey";
+  }
+</script>
+{% endblock %}
